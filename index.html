@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>カブ計算ツール</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #fdfae6;
+            color: #4a3c31;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 450px;
+        }
+        h2 { text-align: center; color: #789440; margin-bottom: 20px; }
+        .box {
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 12px solid;
+        }
+        .input-group { margin-bottom: 15px; }
+        label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        ruby { font-style: normal; }
+        rt { font-size: 0.6em; font-weight: normal; }
+
+        input[type="number"] {
+            width: 90%;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 20px;
+            appearance: textfield;
+            outline: none;
+            background: #fff;
+        }
+        input[type="number"]:focus { border-color: #789440; }
+        
+        /* プレースホルダー（薄いグレーの文字）の色設定 */
+        ::placeholder {
+            color: #ccc;
+            opacity: 1;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .buy { border-color: #ffd54f; background-color: #fffde7; }
+        .sell { border-color: #81c784; background-color: #f1f8e9; }
+        .atm { border-color: #d1c4e9; background-color: #f3e5f5; }
+
+        .result-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            font-weight: bold;
+            line-height: 1.8;
+        }
+        
+        .red-val { color: #d32f2f; font-size: 1.3em; }
+        .sub-text { font-size: 0.9em; color: #795548; }
+        .separator { font-size: 1.2em; font-weight: bold; margin: 0 10px; color: #795548; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>カブ計算ツール</h2>
+
+    <div class="box buy">
+        <div class="input-group">
+            <label><ruby>買値<rt>かいね</rt></ruby></label>
+            <p style="margin-bottom:5px; font-size:0.9em;">1カブの値段</p>
+            <input type="number" id="buyPrice" placeholder="90" oninput="calc()">
+        </div>
+        <div class="input-group">
+            <p style="margin-bottom:5px; font-size:0.9em;">持てる量（1列＝10マス）</p>
+            <div style="display: flex; align-items: center;">
+                <input type="number" id="rows" placeholder="列" oninput="calc()">
+                <span class="separator">＋</span>
+                <input type="number" id="slots" placeholder="マス" oninput="calc()">
+            </div>
+        </div>
+        <div class="result-card">
+            合計：<span id="totalStocks">0</span> カブ<br>
+            支払額：<span id="cost" class="red-val">0</span> ベル
+        </div>
+    </div>
+
+    <div class="box sell">
+        <div class="input-group">
+            <label><ruby>売値<rt>うりね</rt></ruby></label>
+            <p style="margin-bottom:5px; font-size:0.9em;">1カブの値段</p>
+            <input type="number" id="sellPrice" placeholder="660" oninput="calc()">
+        </div>
+        <div class="result-card">
+            <span class="sub-text">※<span id="targetStocks">0</span> カブ売却時</span><br>
+            受取額：<span id="sales" class="red-val">0</span> ベル<br>
+            <span style="color:#03a9f4;">利益（差額）：＋ <span id="profit">0</span> ベル</span>
+        </div>
+    </div>
+
+    <div class="box atm">
+        <div class="input-group">
+            <label>【ATM入金】</label>
+            <p style="margin-bottom:5px; font-size:0.9em;">99,000ベル × 袋数</p>
+            <input type="number" id="bags" placeholder="袋数" oninput="calc()">
+        </div>
+        <div class="result-card">
+            入金合計：<span id="atmTotal" style="color:#673ab7; font-size:1.2em;">0</span> ベル
+        </div>
+    </div>
+</div>
+
+<script>
+function calc() {
+    const bPrice = Number(document.getElementById('buyPrice').value) || 0;
+    const rows = Number(document.getElementById('rows').value) || 0;
+    const slots = Number(document.getElementById('slots').value) || 0;
+    const sPrice = Number(document.getElementById('sellPrice').value) || 0;
+    const bags = Number(document.getElementById('bags').value) || 0;
+
+    const totalStocks = ((rows * 10) + slots) * 100;
+    const cost = totalStocks * bPrice;
+    const sales = totalStocks * sPrice;
+    const profit = sales - cost;
+
+    document.getElementById('totalStocks').innerText = totalStocks.toLocaleString();
+    document.getElementById('targetStocks').innerText = totalStocks.toLocaleString();
+    document.getElementById('cost').innerText = cost.toLocaleString();
+    document.getElementById('sales').innerText = sales.toLocaleString();
+    document.getElementById('profit').innerText = profit.toLocaleString();
+    document.getElementById('atmTotal').innerText = (bags * 99000).toLocaleString();
+}
+</script>
+
+</body>
+</html>
