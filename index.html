@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>カブ計算ツール（やさしい版）</title>
+    <title>カブ計算ツール（完成版・親切レイアウト）</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -36,7 +36,7 @@
             margin-bottom: 8px;
         }
         ruby { font-style: normal; }
-        rt { font-size: 0.6em; font-weight: normal; }
+        rt { font-size: 0.6em; font-weight: normal; line-height: 1; }
 
         input[type="text"] {
             width: 80%;
@@ -107,6 +107,7 @@
             grid-column: span 2;
             text-align: left;
             padding: 15px;
+            width: auto; /* 幅を自動調整 */
         }
         .trip-num { font-size: 1.4em; color: #e64a19; display: block; }
         .capacity-label { font-size: 0.75em; color: #558b2f; margin-top: 2px; }
@@ -116,7 +117,13 @@
             font-size: 0.9em;
             color: #d32f2f;
             font-weight: bold;
-            line-height: 1.2;
+            line-height: 1.5;
+        }
+
+        /* 案内テキストが縦にならないように保護 */
+        #planOutput {
+            white-space: normal;
+            word-break: keep-all;
         }
     </style>
 </head>
@@ -194,7 +201,7 @@
                 </div>
             </div>
             <div id="tripAlert" class="highlight-box plan-style" style="display:none; background:#ffecb3; border-color:#ffa000; text-align:center;">
-                <span class="notice-text"><ruby>資金<rt>しきん</rt></ruby>が<ruby>足<rt>た</rt></ruby>りません！<br><ruby>下<rt>した</rt></ruby>の「わらしべ<ruby>長者<rt>ちょうじゃ</rt></ruby>プラン」を<ruby>確認<rt>かくにん</rt></ruby>してね</span>
+                <span class="notice-text"><ruby>資金<rt>しきん</rt></ruby>が<ruby>足<rt>た</rt></ruby>りません！<br><ruby>下<rt>した</rt></ruby>のプランを<ruby>確認<rt>かくにん</rt></ruby>してね</span>
             </div>
         </div>
     </div>
@@ -203,7 +210,7 @@
         <label>【わらしべ<ruby>長者<rt>ちょうじゃ</rt></ruby>プラン】</label>
         <div class="result-card">
             <div class="highlight-box plan-style" id="planOutput">
-                <ruby>買値<rt>かいね</rt></ruby>、<ruby>売値<rt>うりね</rt></ruby>、<ruby>貯金額<rt>ちょきんがく</rt></ruby>を<ruby>入力<rt>にゅうりょく</rt></ruby>してください。
+                <ruby>買値<rt>かいね</rt></ruby>、<ruby>売値<rt>うりね</rt></ruby>、<ruby>貯金<rt>ちょきん</rt></ruby>を<ruby>入<rt>い</rt></ruby>れてね
             </div>
         </div>
     </div>
@@ -300,7 +307,7 @@ function calc() {
         document.getElementById('tripAlert').style.display = "none";
         document.getElementById('tripsFull').innerText = "0";
         document.getElementById('tripsCurrent').innerText = "0";
-        output.innerText = "買値、売値、貯金額を入力してください。";
+        output.innerHTML = "<ruby>買値<rt>かいね</rt></ruby>、<ruby>売値<rt>うりね</rt></ruby>、<ruby>貯金<rt>ちょきん</rt></ruby>を<ruby>入<rt>い</rt></ruby>れてね";
         return;
     }
 
