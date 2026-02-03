@@ -69,7 +69,6 @@
         }
         input[type="text"]:focus { border-color: #789440; }
 
-        /* 入力不可の時の見た目 */
         input[type="text"]:disabled {
             background: #eceff1;
             color: transparent;
@@ -84,6 +83,7 @@
         .goal { border-color: #ff8a65; background-color: #fff3e0; }
         .plan { border-color: #4db6ac; background-color: #e0f2f1; }
         .atm { border-color: #d1c4e9; background-color: #f3e5f5; }
+        .memo { border-color: #90a4ae; background-color: #eceff1; }
 
         .result-card {
             background: white;
@@ -118,7 +118,6 @@
         }
         .highlight-box.small { background: #f0f4c3; border-color: #afb42b; }
 
-        /* わらしべ長者プラン枠 */
         .highlight-box.plan-style {
             background: #b2dfdb;
             border-color: #00897b;
@@ -130,7 +129,6 @@
             line-height: 1.65;
         }
 
-        /* プラン内のデフォルト余白を強制的に消す（下余白対策） */
         .plan-style div { margin: 0; }
         .plan-style ul { margin: 8px 0 0; }
         .plan-style ul:last-child { margin-bottom: 0; }
@@ -138,16 +136,13 @@
 
         #planOutput { white-space: normal; word-break: keep-all; }
 
-        /* 入力前だけ：縦中央＋1行固定 */
         #planOutput.plan-empty {
             display: flex;
             align-items: center;
             justify-content: flex-start;
             min-height: 70px;
         }
-        #planOutput .empty-msg{
-            white-space: nowrap;
-        }
+        #planOutput .empty-msg{ white-space: nowrap; }
 
         .trip-num { font-size: 1.4em; color: #e64a19; display: block; }
         .capacity-label { font-size: 0.75em; color: #558b2f; margin-top: 2px; }
@@ -183,11 +178,78 @@
             line-height: 1.6;
         }
 
-        .notice-text {
+        /* ========= メモUI ========= */
+        .memo-row{
+            display:flex;
+            gap:10px;
+            align-items:center;
+            flex-wrap:wrap;
+        }
+        .memo-mini{
             font-size: 0.9em;
-            color: #d32f2f;
-            font-weight: bold;
-            line-height: 1.2;
+            color: #455a64;
+            line-height: 1.5;
+        }
+        .btn{
+            border: 1px solid #90a4ae;
+            background:#fff;
+            border-radius: 10px;
+            padding: 8px 10px;
+            cursor:pointer;
+            font-size: 0.9em;
+        }
+        .btn.small{
+            padding: 6px 10px;
+            border-radius: 999px;
+        }
+        .btn.primary{
+            border-color:#607d8b;
+        }
+        .btn.danger{
+            border-color:#c62828;
+            color:#c62828;
+        }
+        textarea{
+            width: 95%;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            background:#fff;
+            color:#4a3c31;
+            outline:none;
+        }
+        textarea:focus{ border-color:#90a4ae; }
+
+        .counter{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        .counter .val{
+            min-width: 64px;
+            text-align:center;
+            font-size: 1.2em;
+            color:#37474f;
+            font-weight:bold;
+            background:#fff;
+            border: 2px dashed #90a4ae;
+            border-radius: 12px;
+            padding: 6px 10px;
+        }
+        .auto-box{
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background:#fff;
+            border: 2px dashed #b0bec5;
+            color:#37474f;
+            line-height: 1.6;
+        }
+        .mono{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         }
     </style>
 </head>
@@ -293,9 +355,90 @@
             <ruby>入金合計<rt>にゅうきんごうけい</rt></ruby>：<span id="atmTotal" style="color:#673ab7; font-size:1.3em;">0</span> ベル
         </div>
     </div>
+
+    <!-- ========= メモ（Cookie保存） ========= -->
+    <div class="box memo">
+        <label>【📝メモ】</label>
+
+        <div class="auto-box">
+            <div class="memo-mini">
+                <b><ruby>買値<rt>かいね</rt></ruby>に<ruby>必要<rt>ひつよう</rt></ruby>なベル<ruby>袋<rt>ぶくろ</rt></ruby>の<ruby>数<rt>かず</rt></ruby>（<ruby>支払額<rt>しはらいがく</rt></ruby>）：</b>
+                <span class="mono"><span id="autoBags">0</span></span> <ruby>袋<rt>ふくろ</rt></ruby> ＋
+                <span class="mono"><span id="autoRemainder">0</span></span> ベル
+            </div>
+            <div style="margin-top:8px;" class="memo-row">
+                <button class="btn primary" id="copyToMemo" type="button">この<ruby>内容<rt>ないよう</rt></ruby>をメモに<ruby>入<rt>い</rt></ruby>れる</button>
+            </div>
+        </div>
+
+        <div style="height:12px;"></div>
+
+        <div class="memo-mini"><b><ruby>何往復<rt>なんおうふく</rt></ruby>したか</b></div>
+        <div class="memo-row" style="margin-top:6px;">
+            <div class="counter">
+                <span class="memo-mini"><b><ruby>買値<rt>かいね</rt></ruby>：</b></span>
+                <button class="btn small" id="buyTripMinus" type="button">−</button>
+                <div class="val"><span id="buyTripCount">0</span></div>
+                <button class="btn small" id="buyTripPlus" type="button">＋</button>
+                <button class="btn small danger" id="buyTripReset" type="button"><ruby>消<rt>け</rt></ruby>す</button>
+            </div>
+        </div>
+
+        <div class="memo-row" style="margin-top:10px;">
+            <div class="counter">
+                <span class="memo-mini"><b><ruby>売値<rt>うりね</rt></ruby>：</b></span>
+                <button class="btn small" id="sellTripMinus" type="button">−</button>
+                <div class="val"><span id="sellTripCount">0</span></div>
+                <button class="btn small" id="sellTripPlus" type="button">＋</button>
+                <button class="btn small danger" id="sellTripReset" type="button"><ruby>消<rt>け</rt></ruby>す</button>
+            </div>
+        </div>
+
+        <div style="height:12px;"></div>
+
+        <div class="memo-mini"><ruby>ベル袋<rt>べるぶくろ</rt></ruby>メモ</div>
+        <textarea id="bagMemo" rows="2" placeholder="例：買値に必要なベル袋の数：2袋＋76,400ベル"></textarea>
+
+        <div style="height:12px;"></div>
+
+        <div class="memo-mini"><ruby>メモ<rt>めも</rt></ruby></div>
+        <textarea id="freeMemo" rows="4" placeholder="例：今日は売値660、買値3往復、売値2往復"></textarea>
+
+        <div style="height:12px;"></div>
+        <div class="memo-row">
+            <button class="btn danger" id="clearMemoAll" type="button"><ruby>メモ<rt>めも</rt></ruby>を<ruby>全消去<rt>ぜんしょうきょ</rt></ruby></button>
+        </div>
+    </div>
 </div>
 
 <script>
+/* ========= Cookieユーティリティ ========= */
+const COOKIE_KEY = "kabutool_memo_v2";
+function setCookie(name, value, days){
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = name + "=" + encodeURIComponent(value) + "; expires=" + d.toUTCString() + "; path=/; SameSite=Lax";
+}
+function getCookie(name){
+    const target = name + "=";
+    const parts = document.cookie.split("; ");
+    for(const p of parts){
+        if(p.indexOf(target) === 0) return decodeURIComponent(p.substring(target.length));
+    }
+    return "";
+}
+function loadState(){
+    const raw = getCookie(COOKIE_KEY);
+    if(!raw) return null;
+    try { return JSON.parse(raw); } catch(e){ return null; }
+}
+function saveState(partial){
+    const current = loadState() || {};
+    const next = { ...current, ...partial, _savedAt: Date.now() };
+    setCookie(COOKIE_KEY, JSON.stringify(next), 365);
+}
+
+/* ========= 入力フォーマット（既存） ========= */
 let isComposing = false;
 document.querySelectorAll('.comma-input').forEach(input => {
     input.addEventListener('compositionstart', () => { isComposing = true; });
@@ -327,6 +470,60 @@ function setPlanEmptyState(isEmpty){
     }
 }
 
+/* ========= メモUI ========= */
+const bagMemoEl = document.getElementById("bagMemo");
+const freeMemoEl = document.getElementById("freeMemo");
+
+const autoBagsEl = document.getElementById("autoBags");
+const autoRemEl  = document.getElementById("autoRemainder");
+
+const buyTripEl  = document.getElementById("buyTripCount");
+const sellTripEl = document.getElementById("sellTripCount");
+
+function clampInt(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
+
+function setCounter(el, key, v){
+    const n = clampInt(v);
+    el.textContent = n.toLocaleString();
+    saveState({ [key]: n });
+}
+function getCounter(el){
+    return parseNumber(el.textContent);
+}
+
+/* 買値カウンター */
+document.getElementById("buyTripPlus").addEventListener("click", () => setCounter(buyTripEl, "buyTripCount", getCounter(buyTripEl) + 1));
+document.getElementById("buyTripMinus").addEventListener("click", () => setCounter(buyTripEl, "buyTripCount", getCounter(buyTripEl) - 1));
+document.getElementById("buyTripReset").addEventListener("click", () => setCounter(buyTripEl, "buyTripCount", 0));
+
+/* 売値カウンター */
+document.getElementById("sellTripPlus").addEventListener("click", () => setCounter(sellTripEl, "sellTripCount", getCounter(sellTripEl) + 1));
+document.getElementById("sellTripMinus").addEventListener("click", () => setCounter(sellTripEl, "sellTripCount", getCounter(sellTripEl) - 1));
+document.getElementById("sellTripReset").addEventListener("click", () => setCounter(sellTripEl, "sellTripCount", 0));
+
+/* メモ保存 */
+bagMemoEl.addEventListener("input", () => saveState({ bagMemo: bagMemoEl.value }));
+freeMemoEl.addEventListener("input", () => saveState({ freeMemo: freeMemoEl.value }));
+
+/* 自動値をメモへ */
+document.getElementById("copyToMemo").addEventListener("click", () => {
+    const bags = autoBagsEl.textContent;
+    const rem  = autoRemEl.textContent;
+    const text = `買値に必要なベル袋の数：${bags}袋＋${rem}ベル`;
+    bagMemoEl.value = text;
+    saveState({ bagMemo: text });
+});
+
+/* 全消去 */
+document.getElementById("clearMemoAll").addEventListener("click", () => {
+    bagMemoEl.value = "";
+    freeMemoEl.value = "";
+    setCounter(buyTripEl,  "buyTripCount", 0);
+    setCounter(sellTripEl, "sellTripCount", 0);
+    saveState({ bagMemo: "", freeMemo: "", buyTripCount: 0, sellTripCount: 0 });
+});
+
+/* ========= 既存：計算 ========= */
 function calc() {
     const buyVal = document.getElementById('buyPrice').value;
     const sellVal = document.getElementById('sellPrice').value;
@@ -376,6 +573,12 @@ function calc() {
 
     const needed = Math.max(0, targetBank - currentBank);
     document.getElementById('neededAmount').innerText = needed.toLocaleString();
+
+    /* 支払額 → 99,000袋＋余り */
+    const autoBags = Math.floor(costCurrent / 99000);
+    const autoRem  = costCurrent % 99000;
+    autoBagsEl.textContent = autoBags.toLocaleString();
+    autoRemEl.textContent  = autoRem.toLocaleString();
 
     let output = document.getElementById('planOutput');
 
@@ -459,14 +662,33 @@ function calc() {
     }
 }
 
-/* ふりがな ON/OFF */
+/* ========= ふりがな ON/OFF（保存つき） ========= */
 const rubyBtn = document.getElementById('rubyToggle');
 rubyBtn.addEventListener('click', () => {
     document.body.classList.toggle('no-ruby');
-    rubyBtn.textContent = document.body.classList.contains('no-ruby')
-        ? 'ふりがな：OFF'
-        : 'ふりがな：ON';
+    const off = document.body.classList.contains('no-ruby');
+    rubyBtn.textContent = off ? 'ふりがな：OFF' : 'ふりがな：ON';
+    saveState({ rubyOff: off });
 });
+
+/* ========= 初期復元 ========= */
+(function initFromCookie(){
+    const st = loadState();
+    if(!st) return;
+
+    if(st.rubyOff){
+        document.body.classList.add('no-ruby');
+        rubyBtn.textContent = 'ふりがな：OFF';
+    }
+
+    if(typeof st.buyTripCount === "number")  buyTripEl.textContent  = st.buyTripCount.toLocaleString();
+    if(typeof st.sellTripCount === "number") sellTripEl.textContent = st.sellTripCount.toLocaleString();
+    if(typeof st.bagMemo === "string")  bagMemoEl.value = st.bagMemo;
+    if(typeof st.freeMemo === "string") freeMemoEl.value = st.freeMemo;
+})();
+
+/* 初回描画 */
+calc();
 </script>
 </body>
 </html>
