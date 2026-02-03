@@ -14,7 +14,6 @@
             padding: 20px;
         }
 
-        /* ふりがなOFF（rtだけ非表示） */
         body.no-ruby rt { display: none; }
 
         .container {
@@ -27,7 +26,6 @@
         }
         h2 { text-align: center; color: #789440; margin-bottom: 20px; }
 
-        /* ふりがな切替ボタン */
         #rubyToggle{
             display:block;
             margin: 0 auto 15px;
@@ -356,7 +354,6 @@
         </div>
     </div>
 
-    <!-- メモ（Cookie保存） -->
     <div class="box memo">
         <label>【📝メモ】</label>
 
@@ -413,8 +410,8 @@
 </div>
 
 <script>
-/* Cookieユーティリティ */
-const COOKIE_KEY = "kabutool_memo_v3";
+const COOKIE_KEY = "kabutool_state_v4";
+
 function setCookie(name, value, days){
     const d = new Date();
     d.setTime(d.getTime() + (days*24*60*60*1000));
@@ -455,11 +452,15 @@ function formatAndCalc(el) {
     el.value = rawVal !== "" ? Number(rawVal).toLocaleString() : "";
     let newLen = el.value.length;
     el.setSelectionRange(cursor + (newLen - originalLen), cursor + (newLen - originalLen));
+
+    /* 入力値をCookie保存（計算前でも保存） */
+    persistInputs();
+
     calc();
 }
 
 function parseNumber(str) {
-    return Number(str.replace(/,/g, '')) || 0;
+    return Number((str || "").replace(/,/g, '')) || 0;
 }
 
 function setPlanEmptyState(isEmpty){
@@ -469,6 +470,19 @@ function setPlanEmptyState(isEmpty){
     }else{
         plan.classList.remove('plan-empty');
     }
+}
+
+/* 入力系を保存 */
+function persistInputs(){
+    saveState({
+        buyPrice: document.getElementById('buyPrice').value,
+        sellPrice: document.getElementById('sellPrice').value,
+        rows: document.getElementById('rows').value,
+        slots: document.getElementById('slots').value,
+        currentBank: document.getElementById('currentBank').value,
+        targetBank: document.getElementById('targetBank').value,
+        bags: document.getElementById('bags').value
+    });
 }
 
 /* メモUI */
@@ -517,7 +531,7 @@ document.getElementById("copyToMemo").addEventListener("click", () => {
     saveState({ bagMemo: text });
 });
 
-/* 全消去 */
+/* 全消去（メモだけ） */
 document.getElementById("clearMemoAll").addEventListener("click", () => {
     bagMemoEl.value = "";
     freeMemoEl.value = "";
@@ -577,7 +591,6 @@ function calc() {
     const needed = Math.max(0, targetBank - currentBank);
     document.getElementById('neededAmount').innerText = needed.toLocaleString();
 
-    /* 支払額 → 99,000袋＋余り + 合計 */
     const autoBags = Math.floor(costCurrent / 99000);
     const autoRem  = costCurrent % 99000;
     autoBagsEl.textContent = autoBags.toLocaleString();
@@ -675,24 +688,41 @@ rubyBtn.addEventListener('click', () => {
     saveState({ rubyOff: off });
 });
 
-/* 初期復元 */
+/* 初期復元：入力値＋メモ＋往復数＋ふりがな */
 (function initFromCookie(){
     const st = loadState();
-    if(!st) return;
+    if(!st) { calc(); return; }
 
     if(st.rubyOff){
         document.body.classList.add('no-ruby');
         rubyBtn.textContent = 'ふりがな：OFF';
     }
 
+    /* 入力値の復元（目標金額も含む） */
+    const map = [
+        ["buyPrice","buyPrice"],
+        ["sellPrice","sellPrice"],
+        ["rows","rows"],
+        ["slots","slots"],
+        ["currentBank","currentBank"],
+        ["targetBank","targetBank"],
+        ["bags","bags"],
+    ];
+    for(const [id,key] of map){
+        if(typeof st[key] === "string"){
+            const el = document.getElementById(id);
+            el.value = st[key];
+        }
+    }
+
     if(typeof st.buyTripCount === "number")  buyTripEl.textContent  = st.buyTripCount.toLocaleString();
     if(typeof st.sellTripCount === "number") sellTripEl.textContent = st.sellTripCount.toLocaleString();
+
     if(typeof st.bagMemo === "string")  bagMemoEl.value = st.bagMemo;
     if(typeof st.freeMemo === "string") freeMemoEl.value = st.freeMemo;
-})();
 
-/* 初回描画 */
-calc();
+    calc();
+})();
 </script>
 </body>
 </html>
