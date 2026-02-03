@@ -14,7 +14,7 @@
             padding: 20px;
         }
 
-        /* ========= ふりがなOFF（rtだけ非表示） ========= */
+        /* ふりがなOFF（rtだけ非表示） */
         body.no-ruby rt { display: none; }
 
         .container {
@@ -27,7 +27,7 @@
         }
         h2 { text-align: center; color: #789440; margin-bottom: 20px; }
 
-        /* ========= ふりがな切替ボタン ========= */
+        /* ふりがな切替ボタン */
         #rubyToggle{
             display:block;
             margin: 0 auto 15px;
@@ -178,7 +178,7 @@
             line-height: 1.6;
         }
 
-        /* ========= メモUI ========= */
+        /* メモUI */
         .memo-row{
             display:flex;
             gap:10px;
@@ -356,15 +356,16 @@
         </div>
     </div>
 
-    <!-- ========= メモ（Cookie保存） ========= -->
+    <!-- メモ（Cookie保存） -->
     <div class="box memo">
         <label>【📝メモ】</label>
 
         <div class="auto-box">
             <div class="memo-mini">
-                <b><ruby>買値<rt>かいね</rt></ruby>に<ruby>必要<rt>ひつよう</rt></ruby>なベル<ruby>袋<rt>ぶくろ</rt></ruby>の<ruby>数<rt>かず</rt></ruby>（<ruby>支払額<rt>しはらいがく</rt></ruby>）：</b>
+                <b><ruby>買値<rt>かいね</rt></ruby>に<ruby>必要<rt>ひつよう</rt></ruby>なベル<ruby>袋<rt>ぶくろ</rt></ruby>の<ruby>数<rt>かず</rt></ruby>（<ruby>支払額<rt>しはらいがく</rt></ruby>）：</b><br>
                 <span class="mono"><span id="autoBags">0</span></span> <ruby>袋<rt>ふくろ</rt></ruby> ＋
                 <span class="mono"><span id="autoRemainder">0</span></span> ベル
+                （<ruby>支払額合計<rt>しはらいがくごうけい</rt></ruby>：<span class="mono"><span id="autoCostTotal">0</span></span> ベル）
             </div>
             <div style="margin-top:8px;" class="memo-row">
                 <button class="btn primary" id="copyToMemo" type="button">この<ruby>内容<rt>ないよう</rt></ruby>をメモに<ruby>入<rt>い</rt></ruby>れる</button>
@@ -397,7 +398,7 @@
         <div style="height:12px;"></div>
 
         <div class="memo-mini"><ruby>ベル袋<rt>べるぶくろ</rt></ruby>メモ</div>
-        <textarea id="bagMemo" rows="2" placeholder="例：買値に必要なベル袋の数：2袋＋76,400ベル"></textarea>
+        <textarea id="bagMemo" rows="2" placeholder="例：買値に必要なベル袋の数：2袋＋76,400ベル（支払額合計：178,200ベル）"></textarea>
 
         <div style="height:12px;"></div>
 
@@ -412,8 +413,8 @@
 </div>
 
 <script>
-/* ========= Cookieユーティリティ ========= */
-const COOKIE_KEY = "kabutool_memo_v2";
+/* Cookieユーティリティ */
+const COOKIE_KEY = "kabutool_memo_v3";
 function setCookie(name, value, days){
     const d = new Date();
     d.setTime(d.getTime() + (days*24*60*60*1000));
@@ -438,7 +439,7 @@ function saveState(partial){
     setCookie(COOKIE_KEY, JSON.stringify(next), 365);
 }
 
-/* ========= 入力フォーマット（既存） ========= */
+/* 入力フォーマット */
 let isComposing = false;
 document.querySelectorAll('.comma-input').forEach(input => {
     input.addEventListener('compositionstart', () => { isComposing = true; });
@@ -470,12 +471,13 @@ function setPlanEmptyState(isEmpty){
     }
 }
 
-/* ========= メモUI ========= */
+/* メモUI */
 const bagMemoEl = document.getElementById("bagMemo");
 const freeMemoEl = document.getElementById("freeMemo");
 
 const autoBagsEl = document.getElementById("autoBags");
 const autoRemEl  = document.getElementById("autoRemainder");
+const autoCostEl = document.getElementById("autoCostTotal");
 
 const buyTripEl  = document.getElementById("buyTripCount");
 const sellTripEl = document.getElementById("sellTripCount");
@@ -509,7 +511,8 @@ freeMemoEl.addEventListener("input", () => saveState({ freeMemo: freeMemoEl.valu
 document.getElementById("copyToMemo").addEventListener("click", () => {
     const bags = autoBagsEl.textContent;
     const rem  = autoRemEl.textContent;
-    const text = `買値に必要なベル袋の数：${bags}袋＋${rem}ベル`;
+    const total = autoCostEl.textContent;
+    const text = `買値に必要なベル袋の数：${bags}袋＋${rem}ベル（支払額合計：${total}ベル）`;
     bagMemoEl.value = text;
     saveState({ bagMemo: text });
 });
@@ -523,7 +526,7 @@ document.getElementById("clearMemoAll").addEventListener("click", () => {
     saveState({ bagMemo: "", freeMemo: "", buyTripCount: 0, sellTripCount: 0 });
 });
 
-/* ========= 既存：計算 ========= */
+/* 既存：計算 */
 function calc() {
     const buyVal = document.getElementById('buyPrice').value;
     const sellVal = document.getElementById('sellPrice').value;
@@ -574,11 +577,12 @@ function calc() {
     const needed = Math.max(0, targetBank - currentBank);
     document.getElementById('neededAmount').innerText = needed.toLocaleString();
 
-    /* 支払額 → 99,000袋＋余り */
+    /* 支払額 → 99,000袋＋余り + 合計 */
     const autoBags = Math.floor(costCurrent / 99000);
     const autoRem  = costCurrent % 99000;
     autoBagsEl.textContent = autoBags.toLocaleString();
     autoRemEl.textContent  = autoRem.toLocaleString();
+    autoCostEl.textContent = costCurrent.toLocaleString();
 
     let output = document.getElementById('planOutput');
 
@@ -662,7 +666,7 @@ function calc() {
     }
 }
 
-/* ========= ふりがな ON/OFF（保存つき） ========= */
+/* ふりがな ON/OFF（保存つき） */
 const rubyBtn = document.getElementById('rubyToggle');
 rubyBtn.addEventListener('click', () => {
     document.body.classList.toggle('no-ruby');
@@ -671,7 +675,7 @@ rubyBtn.addEventListener('click', () => {
     saveState({ rubyOff: off });
 });
 
-/* ========= 初期復元 ========= */
+/* 初期復元 */
 (function initFromCookie(){
     const st = loadState();
     if(!st) return;
