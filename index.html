@@ -1,603 +1,1033 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>あつ森｜カブ価計算・利益計算ツール</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #fdfae6;
-            color: #4a3c31;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
+  <meta charset="UTF-8" />
+  <title>あつ森｜カブ価計算・利益計算ツール</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root{
+      --bg: #fdfae6;
+      --text: #4a3c31;
+      --accent: #789440;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
 
-        /* ふりがなOFF（rtだけ非表示） */
-        body.no-ruby rt { display: none; }
+    body{
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display:flex;
+      justify-content:center;
+      padding:20px;
+      margin:0;
+    }
 
-        .container {
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 450px;
-        }
-        h2 { text-align: center; color: #789440; margin-bottom: 20px; }
+    /* ふりがなOFF（rtだけ非表示） */
+    body.no-ruby rt{ display:none; }
 
-        /* ふりがな切替ボタン（※Cookie保存しない） */
-        #rubyToggle{
-            display:block;
-            margin: 0 auto 15px;
-            padding: 6px 14px;
-            border-radius: 999px;
-            border: 1px solid #789440;
-            background: #fff;
-            cursor: pointer;
-            font-size: 0.85em;
-        }
+    .container{
+      background:#fff;
+      padding:25px;
+      border-radius:20px;
+      box-shadow: var(--shadow);
+      width:100%;
+      max-width:480px;
+      box-sizing:border-box;
+    }
 
-        .box {
-            margin-bottom: 15px;
-            padding: 20px;
-            border-radius: 15px;
-            border-left: 12px solid;
-        }
-        .input-group { margin-bottom: 15px; }
-        label {
-            display: block;
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        ruby { font-style: normal; }
-        rt { font-size: 0.6em; font-weight: normal; }
+    h2{
+      text-align:center;
+      color: var(--accent);
+      margin: 6px 0 18px;
+      line-height:1.25;
+      font-size:1.22em;
+      letter-spacing:.01em;
+    }
 
-        input[type="text"] {
-            width: 80%;
-            padding: 12px;
-            border: 2px solid #eee;
-            border-radius: 12px;
-            font-size: 18px;
-            outline: none;
-            background: #fff;
-            color: #4a3c31;
-            text-align: right;
-            padding-right: 15px;
-        }
-        input[type="text"]:focus { border-color: #789440; }
+    #rubyToggle{
+      display:block;
+      margin: 0 auto 15px;
+      padding: 6px 14px;
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:#fff;
+      cursor:pointer;
+      font-size:0.85em;
+      line-height:1.2;
+    }
 
-        input[type="text"]:disabled {
-            background: #eceff1;
-            color: transparent;
-            border-color: #cfd8dc;
-            cursor: not-allowed;
-        }
-        input[type="text"]:disabled::placeholder { color: transparent; }
-        ::placeholder { color: #ccc; opacity: 1; }
+    .box{
+      margin-bottom:15px;
+      padding:20px;
+      border-radius:15px;
+      border-left:12px solid;
+      box-sizing:border-box;
+    }
 
-        .buy { border-color: #ffd54f; background-color: #fffde7; }
-        .sell { border-color: #81c784; background-color: #f1f8e9; }
-        .goal { border-color: #ff8a65; background-color: #fff3e0; }
-        .plan { border-color: #4db6ac; background-color: #e0f2f1; }
-        .atm { border-color: #d1c4e9; background-color: #f3e5f5; }
-        .memo { border-color: #90a4ae; background-color: #eceff1; }
+    .buy { border-color: #ffd54f; background-color: #fffde7; }
+    .sell{ border-color: #81c784; background-color: #f1f8e9; }
+    .goal{ border-color: #ff8a65; background-color: #fff3e0; }
+    .plan{ border-color: #4db6ac; background-color: #e0f2f1; }
+    .atm { border-color: #d1c4e9; background-color: #f3e5f5; }
+    .memo{ border-color: #90a4ae; background-color: #eceff1; }
 
-        .result-card {
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 10px;
-            font-weight: bold;
-            line-height: 1.8;
-        }
+    .input-group{ margin-bottom: 14px; }
 
-        .red-val { color: #d32f2f; font-size: 1.3em; }
-        .blue-val { color: #03a9f4; }
-        .sub-text { font-size: 0.85em; color: #795548; margin-bottom: 5px; }
-        .separator { font-size: 1.2em; font-weight: bold; margin: 0 10px; color: #795548; }
+    label{
+      display:block;
+      font-size:1.05em;
+      font-weight:800;
+      margin-bottom:10px;
+      line-height:1.25;
+    }
+    .label-flex{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
 
-        .trip-compare {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .highlight-box {
-            background: #fff9c4;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px dashed #ffb300;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 80px;
-        }
-        .highlight-box.small { background: #f0f4c3; border-color: #afb42b; }
+    .label-left{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:baseline;
+      gap:8px;
+    }
 
-        .highlight-box.plan-style {
-            background: #b2dfdb;
-            border-color: #00897b;
-            grid-column: span 2;
-            text-align: left;
-            padding: 12px 15px;
-            width: 90%;
-            display: block;
-            line-height: 1.65;
-        }
+    .label-sub{
+      font-size:0.72em;
+      font-weight:400;
+      opacity:0.85;
+    }
 
-        .plan-style div { margin: 0; }
-        .plan-style ul { margin: 8px 0 0; }
-        .plan-style ul:last-child { margin-bottom: 0; }
-        .plan-style > :last-child { margin-bottom: 0 !important; }
+    ruby{
+      font-style: normal;
+      line-height: 1.15;
+      ruby-position: over;
+      ruby-align: center;
+    }
+    rt{
+      font-size:0.55em;
+      font-weight:400;
+      line-height: 1;
+    }
 
-        #planOutput { white-space: normal; word-break: keep-all; }
+    .sub-text{
+      font-size:0.85em;
+      color:#795548;
+      margin:0 0 6px;
+      line-height:1.25;
+    }
 
-        #planOutput.plan-empty {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 70px;
-        }
-        #planOutput .empty-msg{ white-space: nowrap; }
+    input[type="text"]{
+      width:100%;
+      padding:12px;
+      border:2px solid #eee;
+      border-radius:12px;
+      font-size:18px;
+      outline:none;
+      background:#fff;
+      color:var(--text);
+      text-align:right;
+      box-sizing:border-box;
+      line-height:1.2;
+    }
 
-        .trip-num { font-size: 1.4em; color: #e64a19; display: block; }
-        .capacity-label { font-size: 0.75em; color: #558b2f; margin-top: 2px; }
+    input[type="text"]:focus{ border-color: var(--accent); }
 
-        .step-list {
-            margin: 10px 0 0;
-            padding-left: 20px;
-            font-size: 0.9em;
-            color: #00695c;
-            line-height: 1.6;
-        }
-        .step-list li{ margin: 0; padding: 0; }
+    input[type="text"]:disabled{
+      background:#eceff1;
+      color: transparent;
+      border-color:#cfd8dc;
+      cursor:not-allowed;
+    }
+    input[type="text"]:disabled::placeholder{ color:transparent; }
+    ::placeholder{ color:#ccc; opacity:1; }
 
-        .step-note{
-            margin: 0 0 0 20px;
-            font-size: 0.9em;
-            color: #00695c;
-            line-height: 1.6;
-            font-weight: bold;
-            display: block;
-            width: 100%;
-            text-align: left !important;
-        }
+    .result-card{
+      background:#fff;
+      padding: 14px 14px;
+      border-radius:12px;
+      margin-top: 10px;
+      font-weight:700;
+      line-height:1.55;
+      box-sizing:border-box;
+      border:1px solid rgba(0,0,0,0.05);
+    }
 
-        #tripAlert {
-            background: #ffecb3;
-            border-color: #ffa000;
-            text-align: center;
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px dashed #ffa000;
-            margin-top: 10px;
-            line-height: 1.6;
-        }
+    .red-val{ color:#d32f2f; font-size:1.25em; }
+    .blue-val{ color:#03a9f4; }
+    .separator{ font-size:1.2em; font-weight:800; margin:0 10px; color:#795548; }
 
-        /* メモUI */
-        .memo-row{
-            display:flex;
-            gap:10px;
-            align-items:center;
-            flex-wrap:wrap;
-        }
-        .memo-mini{
-            font-size: 0.9em;
-            color: #455a64;
-            line-height: 1.5;
-        }
-        .btn{
-            border: 1px solid #90a4ae;
-            background:#fff;
-            border-radius: 10px;
-            padding: 8px 10px;
-            cursor:pointer;
-            font-size: 0.9em;
-        }
-        .btn.small{
-            padding: 6px 10px;
-            border-radius: 999px;
-        }
-        .btn.primary{
-            border-color:#607d8b;
-        }
-        .btn.danger{
-            border-color:#c62828;
-            color:#c62828;
-        }
-        textarea{
-            width: 95%;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 10px 12px;
-            font-size: 14px;
-            line-height: 1.5;
-            resize: vertical;
-            background:#fff;
-            color:#4a3c31;
-            outline:none;
-        }
-        textarea:focus{ border-color:#90a4ae; }
+    .cap-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:nowrap;
+    }
+    .cap-row .cap-input{
+      width:84px;
+      min-width:72px;
+      max-width:96px;
+    }
+    .cap-unit{
+      font-size:0.85em;
+      white-space:nowrap;
+    }
 
-        .counter{
-            display:flex;
-            align-items:center;
-            gap:10px;
-        }
-        .counter .val{
-            min-width: 64px;
-            text-align:center;
-            font-size: 1.2em;
-            color:#37474f;
-            font-weight:bold;
-            background:#fff;
-            border: 2px dashed #90a4ae;
-            border-radius: 12px;
-            padding: 6px 10px;
-        }
-        .auto-box{
-            margin-top: 8px;
-            padding: 10px 12px;
-            border-radius: 12px;
-            background:#fff;
-            border: 2px dashed #b0bec5;
-            color:#37474f;
-            line-height: 1.6;
-        }
-        .mono{
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        }
-    </style>
+    #maxAlert{
+      color:#d32f2f;
+      font-size:0.75em;
+      margin-top:6px;
+      display:none;
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .btn{
+      border:1px solid #90a4ae;
+      background:#fff;
+      border-radius:10px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-size:0.9em;
+      white-space:nowrap;
+      line-height:1.1;
+    }
+    .btn.small{
+      padding: 7px 12px;
+      border-radius:999px;
+    }
+    .btn.primary{ border-color:#607d8b; }
+    .btn.danger{ border-color:#c62828; color:#c62828; }
+
+    .trip-compare{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .highlight-box{
+      background:#fff9c4;
+      padding:10px;
+      border-radius:8px;
+      text-align:center;
+      border:2px dashed #ffb300;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      min-height:80px;
+      box-sizing:border-box;
+      line-height:1.25;
+    }
+    .highlight-box.small{ background:#f0f4c3; border-color:#afb42b; }
+    .trip-num{ font-size:1.35em; color:#e64a19; display:block; }
+    .capacity-label{ font-size:0.75em; color:#558b2f; margin-top:2px; }
+
+    #tripAlert{
+      background:#ffecb3;
+      border-color:#ffa000;
+      text-align:center;
+      padding: 14px;
+      border-radius:12px;
+      border:2px dashed #ffa000;
+      margin-top:10px;
+      line-height:1.45;
+      display:none;
+      box-sizing:border-box;
+    }
+
+    .plan .result-card{ padding: 12px; }
+    .plan-style{
+      background:#b2dfdb;
+      border:2px dashed #00897b;
+      border-radius:12px;
+      padding: 12px 14px;
+      width:100%;
+      box-sizing:border-box;
+      text-align:left;
+      line-height:1.35;
+      overflow:hidden;
+      word-break: normal;
+      overflow-wrap: anywhere;
+    }
+    #planOutput{ line-break: strict; }
+    #planOutput ul{
+      margin: 8px 0 0;
+      padding-left: 1.15em;
+    }
+    #planOutput li{
+      margin: 2px 0;
+      line-height: 1.35;
+    }
+    #planOutput .plan-hr{
+      border:0;
+      border-top: 1px solid rgba(0,137,123,0.35);
+      margin: 10px 0;
+    }
+    #planOutput.plan-empty{
+      display:flex;
+      align-items:center;
+      min-height:70px;
+    }
+    #planOutput .empty-msg{ white-space:nowrap; }
+
+    .atm-note{
+      font-size:0.9em;
+      color:#5e35b1;
+      line-height:1.5;
+      margin-top:8px;
+      font-weight:700;
+    }
+    .atm-line{
+      margin-top:8px;
+      padding:10px 12px;
+      background:#fff;
+      border-radius:12px;
+      border:2px dashed #d1c4e9;
+      line-height:1.55;
+      box-sizing:border-box;
+    }
+
+    textarea{
+      width:100%;
+      border:2px solid #e0e0e0;
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:14px;
+      line-height:1.5;
+      resize:vertical;
+      background:#fff;
+      color:var(--text);
+      outline:none;
+      box-sizing:border-box;
+    }
+    textarea:focus{ border-color:#90a4ae; }
+
+    .memo-mini{
+      font-size:0.92em;
+      color:#455a64;
+      line-height:1.5;
+    }
+
+    .memo-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .goal .memo-row{ margin-bottom:10px; }
+    .goal .btn.small{ margin-left:auto; }
+
+    .memo-white{
+      background:#fff;
+      border-radius:12px;
+      border:2px dashed #c0c6cc;
+      padding:10px 12px;
+      box-sizing:border-box;
+    }
+
+    .counter{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .counter .val{
+      min-width:64px;
+      text-align:center;
+      font-size:1.2em;
+      color:#37474f;
+      font-weight:800;
+      background:#fff;
+      border:2px dashed #90a4ae;
+      border-radius:12px;
+      padding:6px 10px;
+      box-sizing:border-box;
+    }
+
+    .shortcut-box{
+      margin-top:12px;
+      background:#fff;
+      border-radius:12px;
+      border:2px dashed #90a4ae;
+      padding: 12px;
+      box-sizing:border-box;
+    }
+    .shortcut-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .shortcut-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .shortcut-item{
+      border:1px solid rgba(0,0,0,0.10);
+      border-radius:12px;
+      padding:10px;
+      background:#fafafa;
+      box-sizing:border-box;
+    }
+    .shortcut-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .dir{
+      font-weight:900;
+      font-size:1.05em;
+      white-space:nowrap;
+    }
+    .tool-view{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .tool-img{
+      width:34px;
+      height:34px;
+      object-fit:contain;
+      background:#fff;
+      border-radius:8px;
+      border:1px solid rgba(0,0,0,0.08);
+      padding:4px;
+      box-sizing:border-box;
+    }
+    select{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+      background:#fff;
+      font-size: 14px;
+      box-sizing:border-box;
+      outline:none;
+    }
+    select:focus{ border-color:#90a4ae; }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+  </style>
 </head>
-<body>
 
-<div class="container">
+<body>
+  <div class="container">
     <h2>カブ価計算・利益計算ツール</h2>
 
     <button id="rubyToggle" type="button">ふりがな：ON</button>
 
+    <!-- 買値 -->
     <div class="box buy">
-        <label>
-            <ruby>買値<rt>かいね</rt></ruby>
-            <span style="font-size: 0.7em; font-weight: normal;">（カブを<ruby>買<rt>か</rt></ruby>う<ruby>値段<rt>ねだん</rt></ruby>）</span>
-        </label>
+      <label class="label-flex">
+        <span class="label-left">
+          <ruby>買値<rt>かいね</rt></ruby>
+          <span class="label-sub">（カブを<ruby>買<rt>か</rt></ruby>う<ruby>値段<rt>ねだん</rt></ruby>）</span>
+        </span>
+        <button class="btn small danger" id="clearBuy" type="button"><ruby>買値<rt>かいね</rt></ruby>クリア</button>
+      </label>
 
-        <div class="input-group">
-            <p class="sub-text">1カブの<ruby>値段<rt>ねだん</rt></ruby></p>
-            <input type="text" id="buyPrice" placeholder="90" class="comma-input">
+      <div class="input-group">
+        <p class="sub-text">1カブの<ruby>値段<rt>ねだん</rt></ruby></p>
+        <input type="text" id="buyPrice" placeholder="90" class="comma-input" inputmode="numeric" />
+      </div>
+
+      <div class="input-group">
+        <p class="sub-text">持てる<ruby>量<rt>りょう</rt></ruby>（1<ruby>列<rt>れつ</rt></ruby>＝10マス / <ruby>最大<rt>さいだい</rt></ruby>4<ruby>列<rt>れつ</rt></ruby>）</p>
+        <div class="cap-row">
+          <input type="text" id="rows" placeholder="2" class="comma-input cap-input" inputmode="numeric" />
+          <span class="cap-unit"><ruby>列<rt>れつ</rt></ruby></span>
+
+          <span class="separator">＋</span>
+
+          <input type="text" id="slots" placeholder="5" class="comma-input cap-input" inputmode="numeric" />
+          <span class="cap-unit">マス</span>
         </div>
-        <div class="input-group">
-            <p class="sub-text">持てる<ruby>量<rt>りょう</rt></ruby>（1<ruby>列<rt>れつ</rt></ruby>＝10マス / <ruby>最大<rt>さいだい</rt></ruby>4<ruby>列<rt>れつ</rt></ruby>）</p>
-            <div style="display: flex; align-items: center;">
-                <input type="text" id="rows" placeholder="2" class="comma-input"> <span style="font-size:0.8em; margin-left:5px;">列</span>
-                <span class="separator">＋</span>
-                <input type="text" id="slots" placeholder="5" class="comma-input"> <span style="font-size:0.8em; margin-left:5px;">マス</span>
-            </div>
-            <div id="maxAlert" style="color: #d32f2f; font-size: 0.7em; margin-top: 5px; display: none; font-weight: bold;">
-                ※4列（40マス）が最大です
-            </div>
-        </div>
-        <div class="result-card">
-            <ruby>合計<rt>ごうけい</rt></ruby>：<span id="totalStocks">0</span> カブ<br>
-            <ruby>支払額<rt>しはらいがく</rt></ruby>：<span id="cost" class="red-val">0</span> ベル
-        </div>
+        <div id="maxAlert">※4<ruby>列<rt>れつ</rt></ruby>（40マス）が<ruby>最大<rt>さいだい</rt></ruby>です</div>
+      </div>
+
+      <div class="result-card">
+        <ruby>合計<rt>ごうけい</rt></ruby>：<span id="totalStocks">0</span> カブ<br />
+        <ruby>支払額<rt>しはらいがく</rt></ruby>：<span id="cost" class="red-val">0</span> ベル<br />
+        <span class="memo-mini">
+          <ruby>支払<rt>しはら</rt></ruby>のベル<ruby>袋表記<rt>ぶくろひょうき</rt></ruby>：<span class="mono"><span id="costBags">0袋＋0ベル</span></span>
+        </span>
+      </div>
     </div>
 
+    <!-- 売値 -->
     <div class="box sell">
-        <label><ruby>売値<rt>うりね</rt></ruby>
-        <span style="font-size: 0.7em; font-weight: normal;">（カブを<ruby>売<rt>う</rt></ruby>る<ruby>値段<rt>ねだん</rt></ruby>）</span></label>
-        <div class="input-group">
-            <p class="sub-text">1カブの<ruby>値段<rt>ねだん</rt></ruby></p>
-            <input type="text" id="sellPrice" placeholder="660" class="comma-input">
-        </div>
-        <div class="result-card">
-            <span class="sub-text">※<span id="targetStocks">0</span> カブ<ruby>売却時<rt>ばいきゃくじ</rt></ruby></span><br>
-            <ruby>受取額<rt>うけとりがく</rt></ruby>：<span id="sales" class="red-val">0</span> ベル<br>
-            <span class="blue-val"><ruby>利益<rt>りえき</rt></ruby>：＋ <span id="profit">0</span> ベル</span>
-        </div>
+      <label class="label-flex">
+        <span class="label-left">
+          <ruby>売値<rt>うりね</rt></ruby>
+          <span class="label-sub">（カブを<ruby>売<rt>う</rt></ruby>る<ruby>値段<rt>ねだん</rt></ruby>）</span>
+        </span>
+        <button class="btn small danger" id="clearSell" type="button"><ruby>売値<rt>うりね</rt></ruby>クリア</button>
+      </label>
+
+      <div class="input-group">
+        <p class="sub-text">1カブの<ruby>値段<rt>ねだん</rt></ruby></p>
+        <input type="text" id="sellPrice" placeholder="660" class="comma-input" inputmode="numeric" />
+      </div>
+
+      <div class="result-card">
+        <span class="sub-text">※<span id="targetStocks">0</span> カブ<ruby>売却時<rt>ばいきゃくじ</rt></ruby></span><br />
+        <ruby>受取額<rt>うけとりがく</rt></ruby>：<span id="sales" class="red-val">0</span> ベル<br />
+        <span class="blue-val"><ruby>利益<rt>りえき</rt></ruby>：＋ <span id="profit">0</span> ベル</span><br />
+        <span class="memo-mini">
+          <ruby>受取<rt>うけと</rt></ruby>りのベル<ruby>袋表記<rt>ぶくろひょうき</rt></ruby>：<span class="mono"><span id="salesBags">0袋＋0ベル</span></span>
+        </span>
+      </div>
     </div>
 
+    <!-- 目標 -->
     <div class="box goal">
-        <label>【<ruby>目標達成<rt>もくひょうたっせい</rt></ruby>への<ruby>道<rt>みち</rt></ruby>】</label>
-        <div class="input-group">
-            <p class="sub-text"><ruby>現在<rt>げんざい</rt></ruby>の<ruby>貯金額<rt>ちょきんがく</rt></ruby></p>
-            <input type="text" id="currentBank" placeholder="0" class="comma-input">
+      <label>【<ruby>目標達成<rt>もくひょうたっせい</rt></ruby>への<ruby>道<rt>みち</rt></ruby>】</label>
+
+      <div class="input-group">
+        <div class="memo-row" style="justify-content:space-between;">
+          <p class="sub-text" style="margin:0;"><ruby>現在<rt>げんざい</rt></ruby>の<ruby>貯金額<rt>ちょきんがく</rt></ruby></p>
+          <button class="btn small danger" id="clearCurrent" type="button"><ruby>現在<rt>げんざい</rt></ruby>の<ruby>貯金額<rt>ちょきんがく</rt></ruby>をクリア</button>
         </div>
-        <div class="input-group">
-            <p class="sub-text"><ruby>目標<rt>もくひょう</rt></ruby>の<ruby>金額<rt>きんがく</rt></ruby></p>
-            <input type="text" id="targetBank" placeholder="999,999,999" class="comma-input">
+        <input type="text" id="currentBank" placeholder="0" class="comma-input" inputmode="numeric" />
+      </div>
+
+      <div class="input-group">
+        <div class="memo-row" style="justify-content:space-between;">
+          <p class="sub-text" style="margin:0;"><ruby>目標<rt>もくひょう</rt></ruby>の<ruby>金額<rt>きんがく</rt></ruby></p>
+          <button class="btn small danger" id="clearTarget" type="button"><ruby>目標<rt>もくひょう</rt></ruby>をクリア</button>
         </div>
-        <div class="result-card">
-            <ruby>不足額<rt>ふそくがく</rt></ruby>：<span id="neededAmount" class="red-val">0</span> ベル
-            <div id="tripDisplay" class="trip-compare">
-                <div class="highlight-box">
-                    <span class="sub-text">カバン<ruby>最大<rt>さいだい</rt></ruby></span>
-                    <span class="capacity-label">(40マス)</span>
-                    <span class="trip-num"><span id="tripsFull">0</span><ruby>回<rt>かい</rt></ruby></span>
-                </div>
-                <div class="highlight-box small">
-                    <span class="sub-text"><ruby>今<rt>いま</rt></ruby>の<ruby>設定<rt>せってい</rt></ruby></span>
-                    <span class="capacity-label">(カバン<span id="currentCapacityText">0</span>マス)</span>
-                    <span class="trip-num"><span id="tripsCurrent">0</span><ruby>回<rt>かい</rt></ruby></span>
-                </div>
-            </div>
-            <div id="tripAlert" style="display:none;">
-                <span class="red-val" style="font-weight:bold;"><ruby>資金<rt>しきん</rt></ruby>が<ruby>足<rt>た</rt></ruby>りません！</span><br>
-                <ruby>下<rt>した</rt></ruby>のプランを<ruby>確認<rt>かくにん</rt></ruby>してね
-            </div>
+        <input type="text" id="targetBank" placeholder="999,999,999" class="comma-input" inputmode="numeric" />
+      </div>
+
+      <div class="result-card">
+        <ruby>不足額<rt>ふそくがく</rt></ruby>：<span id="neededAmount" class="red-val">0</span> ベル
+
+        <div id="tripDisplay" class="trip-compare">
+          <div class="highlight-box">
+            <span class="sub-text">カバン<ruby>最大<rt>さいだい</rt></ruby></span>
+            <span class="capacity-label">(40マス)</span>
+            <span class="trip-num"><span id="tripsFull">0</span><ruby>回<rt>かい</rt></ruby></span>
+          </div>
+          <div class="highlight-box small">
+            <span class="sub-text"><ruby>今<rt>いま</rt></ruby>の<ruby>設定<rt>せってい</rt></ruby></span>
+            <span class="capacity-label">(カバン<span id="currentCapacityText">0</span>マス)</span>
+            <span class="trip-num"><span id="tripsCurrent">0</span><ruby>回<rt>かい</rt></ruby></span>
+          </div>
         </div>
+
+        <div id="tripAlert">
+          <span class="red-val" style="font-weight:900;"><ruby>資金<rt>しきん</rt></ruby>が<ruby>足<rt>た</rt></ruby>りません！</span><br />
+          <ruby>下<rt>した</rt></ruby>のプランを<ruby>確認<rt>かくにん</rt></ruby>してね
+        </div>
+      </div>
     </div>
 
+    <!-- わらしべ -->
     <div class="box plan">
-        <label>【わらしべ<ruby>長者<rt>ちょうじゃ</rt></ruby>プラン】</label>
-        <div class="result-card">
-            <div class="highlight-box plan-style plan-empty" id="planOutput">
-                <div class="empty-msg">
-                    <ruby>買値<rt>かいね</rt></ruby>・
-                    <ruby>売値<rt>うりね</rt></ruby>・
-                    <ruby>貯金<rt>ちょきん</rt></ruby>を<ruby>入<rt>い</rt></ruby>れてね
-                </div>
-            </div>
+      <label>【わらしべ<ruby>長者<rt>ちょうじゃ</rt></ruby>プラン】</label>
+      <div class="result-card">
+        <div class="plan-style plan-empty" id="planOutput">
+          <div class="empty-msg">
+            <ruby>買値<rt>かいね</rt></ruby>・
+            <ruby>売値<rt>うりね</rt></ruby>・
+            <ruby>貯金<rt>ちょきん</rt></ruby>を<ruby>入<rt>い</rt></ruby>れてね
+          </div>
         </div>
+      </div>
     </div>
 
+    <!-- ATM -->
     <div class="box atm">
-        <label>【ATM <ruby>入金補助<rt>にゅうきんほじょ</rt></ruby>】</label>
-        <div class="input-group">
-            <p class="sub-text">99,000ベル × <ruby>袋数<rt>ふくろすう</rt></ruby></p>
-            <input type="text" id="bags" placeholder="袋数" class="comma-input">
-        </div>
-        <div class="result-card">
-            <ruby>入金合計<rt>にゅうきんごうけい</rt></ruby>：<span id="atmTotal" style="color:#673ab7; font-size:1.3em;">0</span> ベル
-        </div>
+      <label>【ATM <ruby>入金補助<rt>にゅうきんほじょ</rt></ruby>】</label>
+
+      <div class="atm-note">
+        <b>
+          <ruby>設定<rt>せってい</rt></ruby>のカバン<ruby>満タン<rt>まんたん</rt></ruby>（<span id="atmCapacityText">0</span>マス）
+          <ruby>購入<rt>こうにゅう</rt></ruby>に<ruby>届<rt>とど</rt></ruby>く<ruby>時<rt>とき</rt></ruby>だけ<ruby>計算<rt>けいさん</rt></ruby>
+        </b><br>
+        ※「持てる<ruby>量<rt>りょう</rt></ruby>（<ruby>列<rt>れつ</rt></ruby>＋マス）」の<ruby>値<rt>あたい</rt></ruby>で<ruby>満タン<rt>まんたん</rt></ruby>が<ruby>決<rt>き</rt></ruby>まります<br>
+        （4<ruby>列<rt>れつ</rt></ruby>なら40マス<ruby>固定<rt>こてい</rt></ruby>）
+      </div>
+
+      <div class="atm-line">
+        <div><b><ruby>入金目安<rt>にゅうきんめやす</rt></ruby>：</b><span class="mono"><span id="atmSuggestBags">0袋＋0ベル</span></span></div>
+        <div><b>ATM<ruby>入金総額<rt>にゅうきんそうがく</rt></ruby>：</b><span class="mono"><span id="atmSuggestTotal">0</span></span> ベル</div>
+      </div>
+
+      <div class="input-group" style="margin-top:12px;">
+        <p class="sub-text">99,000ベル × <ruby>袋数<rt>ふくろすう</rt></ruby>（<ruby>手計算用<rt>てけいさんよう</rt></ruby>）</p>
+        <input type="text" id="bags" placeholder="袋数" class="comma-input" inputmode="numeric" />
+      </div>
+
+      <div class="result-card">
+        <ruby>入金合計<rt>にゅうきんごうけい</rt></ruby>：<span id="atmTotal" style="color:#673ab7; font-size:1.25em;">0</span> ベル
+      </div>
     </div>
 
-    <!-- メモ（Cookie保存：メモ＋往復カウンター＋目標金額だけ） -->
+    <!-- メモ -->
     <div class="box memo">
-        <label>【📝メモ】</label>
+      <label>【📝メモ】</label>
 
-        <div class="auto-box">
-            <div class="memo-mini">
-                <b><ruby>買値<rt>かいね</rt></ruby>に<ruby>必要<rt>ひつよう</rt></ruby>なベル<ruby>袋<rt>ぶくろ</rt></ruby>の<ruby>数<rt>かず</rt></ruby>（<ruby>支払額<rt>しはらいがく</rt></ruby>）：</b><br>
-                <span class="mono"><span id="autoBags">0</span></span> <ruby>袋<rt>ふくろ</rt></ruby> ＋
-                <span class="mono"><span id="autoRemainder">0</span></span> ベル
-                （<ruby>支払額合計<rt>しはらいがくごうけい</rt></ruby>：<span class="mono"><span id="autoCostTotal">0</span></span> ベル）
-            </div>
-            <div style="margin-top:8px;" class="memo-row">
-                <button class="btn primary" id="copyToMemo" type="button">この<ruby>内容<rt>ないよう</rt></ruby>をメモに<ruby>入<rt>い</rt></ruby>れる</button>
-            </div>
+      <div class="memo-white" style="margin-bottom:10px;">
+        <div class="memo-mini">
+          <b><ruby>買値<rt>かいね</rt></ruby>でカバンを<ruby>満タン<rt>まんたん</rt></ruby>に<ruby>買<rt>か</rt></ruby>うときの<ruby>支払<rt>しはら</rt></ruby>い：</b><br>
+          <span class="mono"><span id="memoPayBags">0袋＋0ベル</span></span>
+          （<ruby>支払額合計<rt>しはらいがくごうけい</rt></ruby>：<span class="mono"><span id="memoPayTotal">0</span></span>ベル）
+        </div>
+      </div>
+
+      <div class="memo-white" style="margin-bottom:12px;">
+        <div class="memo-mini">
+          <b>この<ruby>設定<rt>せってい</rt></ruby>での<ruby>目標<rt>もくひょう</rt></ruby>までの<ruby>往復目安<rt>おうふくめやす</rt></ruby>：</b><br>
+          <span class="mono"><span id="memoTripsToGoal">0</span></span>
+          <ruby>往復<rt>おうふく</rt></ruby>
+          <span style="opacity:.85;">（カバン<ruby>満タン購入<rt>まんたんこうにゅう</rt></ruby><ruby>前提<rt>ぜんてい</rt></ruby>）</span>
+        </div>
+      </div>
+
+      <div class="memo-mini"><b><ruby>何往復<rt>なんおうふく</rt></ruby>したか</b></div>
+
+      <div class="memo-row" style="margin-top:6px;">
+        <div class="counter">
+          <span class="memo-mini"><b><ruby>買値<rt>かいね</rt></ruby>：</b></span>
+          <button class="btn small" id="buyTripMinus" type="button">−</button>
+          <div class="val"><span id="buyTripCount">0</span></div>
+          <button class="btn small" id="buyTripPlus" type="button">＋</button>
+          <button class="btn small danger" id="buyTripReset" type="button"><ruby>消<rt>け</rt></ruby>す</button>
+        </div>
+      </div>
+
+      <div class="memo-row" style="margin-top:10px;">
+        <div class="counter">
+          <span class="memo-mini"><b><ruby>売値<rt>うりね</rt></ruby>：</b></span>
+          <button class="btn small" id="sellTripMinus" type="button">−</button>
+          <div class="val"><span id="sellTripCount">0</span></div>
+          <button class="btn small" id="sellTripPlus" type="button">＋</button>
+          <button class="btn small danger" id="sellTripReset" type="button"><ruby>消<rt>け</rt></ruby>す</button>
+        </div>
+      </div>
+
+      <div class="shortcut-box">
+        <div class="shortcut-head">
+          <div class="memo-mini"><b>🎮 ショートカット／カバン<ruby>配置<rt>はいち</rt></ruby>メモ</b></div>
+          <div class="memo-row">
+            <button class="btn small primary" id="shortcutDefault" type="button">基本セットを<ruby>入<rt>い</rt></ruby>れる</button>
+            <button class="btn small danger" id="shortcutClear" type="button">ここだけ<ruby>消<rt>け</rt></ruby>す</button>
+          </div>
         </div>
 
-        <div style="height:12px;"></div>
+        <div class="shortcut-grid" id="shortcutGrid"></div>
 
-        <div class="memo-mini"><b><ruby>何往復<rt>なんおうふく</rt></ruby>したか</b></div>
-        <div class="memo-row" style="margin-top:6px;">
-            <div class="counter">
-                <span class="memo-mini"><b><ruby>買値<rt>かいね</rt></ruby>：</b></span>
-                <button class="btn small" id="buyTripMinus" type="button">−</button>
-                <div class="val"><span id="buyTripCount">0</span></div>
-                <button class="btn small" id="buyTripPlus" type="button">＋</button>
-                <button class="btn small danger" id="buyTripReset" type="button"><ruby>消<rt>け</rt></ruby>す</button>
-            </div>
-        </div>
+        <div style="height:10px;"></div>
 
-        <div class="memo-row" style="margin-top:10px;">
-            <div class="counter">
-                <span class="memo-mini"><b><ruby>売値<rt>うりね</rt></ruby>：</b></span>
-                <button class="btn small" id="sellTripMinus" type="button">−</button>
-                <div class="val"><span id="sellTripCount">0</span></div>
-                <button class="btn small" id="sellTripPlus" type="button">＋</button>
-                <button class="btn small danger" id="sellTripReset" type="button"><ruby>消<rt>け</rt></ruby>す</button>
-            </div>
-        </div>
+        <div class="memo-mini">自由メモ：ショートカット・<ruby>道具<rt>どうぐ</rt></ruby>の<ruby>並<rt>なら</rt></ruby>びを書いてOK</div>
+        <textarea id="shortcutMemo" rows="3" placeholder="例：［ショートカット］⬆️パチンコ ↗️つりざお ↘️スコップ … / ［カバン配置］パチンコ、たかとびぼう、おの、🎣、虫網、じょうろ、はしご、スコップ"></textarea>
+      </div>
 
-        <div style="height:12px;"></div>
+      <div style="height:12px;"></div>
 
-        <div class="memo-mini"><ruby>ベル袋<rt>べるぶくろ</rt></ruby>メモ</div>
-        <textarea id="bagMemo" rows="2" placeholder="例：買値に必要なベル袋の数：2袋＋76,400ベル（支払額合計：178,200ベル）"></textarea>
-
-        <div style="height:12px;"></div>
-
-        <div class="memo-mini"><ruby>メモ<rt>めも</rt></ruby></div>
-        <textarea id="freeMemo" rows="4" placeholder="例：今日は売値660、買値3往復、売値2往復"></textarea>
-
-        <div style="height:12px;"></div>
-        <div class="memo-row">
-            <button class="btn danger" id="clearMemoAll" type="button"><ruby>メモ<rt>めも</rt></ruby>を<ruby>全消去<rt>ぜんしょうきょ</rt></ruby></button>
-        </div>
+      <div class="memo-row">
+        <button class="btn danger" id="clearMemoAll" type="button"><ruby>メモ<rt>めも</rt></ruby>を<ruby>全消去<rt>ぜんしょうきょ</rt></ruby></button>
+      </div>
     </div>
-</div>
+  </div>
 
-<script>
-/* Cookie（保存対象：目標金額＋メモ＋往復カウンター） */
-const COOKIE_KEY = "kabutool_state_min_v1";
-function setCookie(name, value, days){
-    const d = new Date();
-    d.setTime(d.getTime() + (days*24*60*60*1000));
-    document.cookie = name + "=" + encodeURIComponent(value) + "; expires=" + d.toUTCString() + "; path=/; SameSite=Lax";
-}
-function getCookie(name){
-    const target = name + "=";
-    const parts = document.cookie.split("; ");
-    for(const p of parts){
+  <script>
+    const COOKIE_KEY = "kabutool_state_full_v5";
+
+    function setCookie(name, value, days){
+      const d = new Date();
+      d.setTime(d.getTime() + (days*24*60*60*1000));
+      document.cookie = name + "=" + encodeURIComponent(value) + "; expires=" + d.toUTCString() + "; path=/; SameSite=Lax";
+    }
+    function getCookie(name){
+      const target = name + "=";
+      const parts = document.cookie.split("; ");
+      for(const p of parts){
         if(p.indexOf(target) === 0) return decodeURIComponent(p.substring(target.length));
+      }
+      return "";
     }
-    return "";
-}
-function loadState(){
-    const raw = getCookie(COOKIE_KEY);
-    if(!raw) return null;
-    try { return JSON.parse(raw); } catch(e){ return null; }
-}
-function saveState(partial){
-    const current = loadState() || {};
-    const next = { ...current, ...partial, _savedAt: Date.now() };
-    setCookie(COOKIE_KEY, JSON.stringify(next), 365);
-}
-
-/* 入力フォーマット */
-let isComposing = false;
-document.querySelectorAll('.comma-input').forEach(input => {
-    input.addEventListener('compositionstart', () => { isComposing = true; });
-    input.addEventListener('compositionend', function() { isComposing = false; formatAndCalc(this); });
-    input.addEventListener('input', function() { if (!isComposing) { formatAndCalc(this); } });
-});
-
-function formatAndCalc(el) {
-    let cursor = el.selectionStart;
-    let originalLen = el.value.length;
-    let val = el.value.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-    let rawVal = val.replace(/[^0-9]/g, '');
-    el.value = rawVal !== "" ? Number(rawVal).toLocaleString() : "";
-    let newLen = el.value.length;
-    el.setSelectionRange(cursor + (newLen - originalLen), cursor + (newLen - originalLen));
-
-    /* ★Cookie保存：目標金額だけ */
-    if (el.id === "targetBank") {
-        saveState({ targetBank: el.value });
+    function loadState(){
+      const raw = getCookie(COOKIE_KEY);
+      if(!raw) return null;
+      try { return JSON.parse(raw); } catch(e){ return null; }
+    }
+    function saveState(partial){
+      const current = loadState() || {};
+      const next = { ...current, ...partial, _savedAt: Date.now() };
+      setCookie(COOKIE_KEY, JSON.stringify(next), 365);
     }
 
-    calc();
-}
-
-function parseNumber(str) {
-    return Number((str || "").replace(/,/g, '')) || 0;
-}
-
-function setPlanEmptyState(isEmpty){
-    const plan = document.getElementById('planOutput');
-    if(isEmpty){
-        plan.classList.add('plan-empty');
-    }else{
-        plan.classList.remove('plan-empty');
+    function parseNumber(str){
+      return Number((str || "").replace(/,/g, "")) || 0;
     }
-}
+    function toComma(n){
+      return (Number(n) || 0).toLocaleString();
+    }
+    function toBagsText(bells){
+      const total = Math.max(0, Math.floor(Number(bells) || 0));
+      const bags = Math.floor(total / 99000);
+      const rem  = total % 99000;
+      return `${toComma(bags)}袋＋${toComma(rem)}ベル`;
+    }
 
-/* メモUI */
-const bagMemoEl = document.getElementById("bagMemo");
-const freeMemoEl = document.getElementById("freeMemo");
+    /* caret-safe formatter */
+    let isComposing = false;
 
-const autoBagsEl = document.getElementById("autoBags");
-const autoRemEl  = document.getElementById("autoRemainder");
-const autoCostEl = document.getElementById("autoCostTotal");
+    function digitsLeftOfCaret(value, caret){
+      const left = value.slice(0, caret);
+      return (left.match(/[0-9]/g) || []).length;
+    }
+    function caretFromDigitIndex(formattedValue, digitIndex){
+      if(digitIndex <= 0) return 0;
+      let count = 0;
+      for(let i=0; i<formattedValue.length; i++){
+        if(/[0-9]/.test(formattedValue[i])) count++;
+        if(count === digitIndex) return i+1;
+      }
+      return formattedValue.length;
+    }
 
-const buyTripEl  = document.getElementById("buyTripCount");
-const sellTripEl = document.getElementById("sellTripCount");
+    function normalizeDigits(str){
+      let v = (str || "").replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+      return v.replace(/[^0-9]/g, "");
+    }
 
-function clampInt(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
-function setCounter(el, key, v){
-    const n = clampInt(v);
-    el.textContent = n.toLocaleString();
-    saveState({ [key]: n });
-}
-function getCounter(el){
-    return parseNumber(el.textContent);
-}
+    // ★先頭0を残したままカンマ整形
+    function formatDigitsWithCommas(digits){
+      const s = String(digits || "");
+      if(s === "") return "";
+      return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
 
-/* 買値カウンター */
-document.getElementById("buyTripPlus").addEventListener("click", () => setCounter(buyTripEl, "buyTripCount", getCounter(buyTripEl) + 1));
-document.getElementById("buyTripMinus").addEventListener("click", () => setCounter(buyTripEl, "buyTripCount", getCounter(buyTripEl) - 1));
-document.getElementById("buyTripReset").addEventListener("click", () => setCounter(buyTripEl, "buyTripCount", 0));
+    // ★targetBankの桁数維持
+    let lastTargetLen = 0;
 
-/* 売値カウンター */
-document.getElementById("sellTripPlus").addEventListener("click", () => setCounter(sellTripEl, "sellTripCount", getCounter(sellTripEl) + 1));
-document.getElementById("sellTripMinus").addEventListener("click", () => setCounter(sellTripEl, "sellTripCount", getCounter(sellTripEl) - 1));
-document.getElementById("sellTripReset").addEventListener("click", () => setCounter(sellTripEl, "sellTripCount", 0));
+    function formatInputKeepCaret(el){
+      const rawBefore = el.value;
+      const caretBefore = el.selectionStart ?? rawBefore.length;
 
-/* メモ保存（Cookie） */
-bagMemoEl.addEventListener("input", () => saveState({ bagMemo: bagMemoEl.value }));
-freeMemoEl.addEventListener("input", () => saveState({ freeMemo: freeMemoEl.value }));
+      let v = rawBefore.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+      const digitIdx = digitsLeftOfCaret(v, caretBefore);
 
-/* 自動値をメモへ */
-document.getElementById("copyToMemo").addEventListener("click", () => {
-    const bags = autoBagsEl.textContent;
-    const rem  = autoRemEl.textContent;
-    const total = autoCostEl.textContent;
-    const text = `買値に必要なベル袋の数：${bags}袋＋${rem}ベル（支払額合計：${total}ベル）`;
-    bagMemoEl.value = text;
-    saveState({ bagMemo: text });
-});
+      let rawDigits = v.replace(/[^0-9]/g, "");
+      let formatted = "";
 
-/* 全消去（メモ＋往復だけ。目標金額は残す） */
-document.getElementById("clearMemoAll").addEventListener("click", () => {
-    bagMemoEl.value = "";
-    freeMemoEl.value = "";
-    setCounter(buyTripEl,  "buyTripCount", 0);
-    setCounter(sellTripEl, "sellTripCount", 0);
-    saveState({ bagMemo: "", freeMemo: "", buyTripCount: 0, sellTripCount: 0 });
-});
+      if(el.id === "targetBank"){
+        if(!lastTargetLen){
+          const initDigits = normalizeDigits(rawBefore);
+          lastTargetLen = initDigits ? initDigits.length : 9;
+        }
 
-/* 計算 */
-function calc() {
-    const buyVal = document.getElementById('buyPrice').value;
-    const sellVal = document.getElementById('sellPrice').value;
-    const rowsInput = document.getElementById('rows');
-    const slotsInput = document.getElementById('slots');
-    const bankVal = document.getElementById('currentBank').value;
-    const targetVal = document.getElementById('targetBank').value;
-    const bagsVal = document.getElementById('bags').value;
-    const maxAlert = document.getElementById('maxAlert');
+        if(rawDigits === ""){
+          formatted = "";
+        }else{
+          if(rawDigits.length < lastTargetLen){
+            rawDigits = rawDigits.padStart(lastTargetLen, "0");
+          }
+          if(rawDigits.length > lastTargetLen){
+            lastTargetLen = rawDigits.length;
+          }
+          formatted = formatDigitsWithCommas(rawDigits);
+        }
+      }else{
+        const rawOnlyDigits = rawDigits;
+        formatted = rawOnlyDigits !== "" ? Number(rawOnlyDigits).toLocaleString() : "";
+      }
 
-    let rows = parseNumber(rowsInput.value);
-    let slots = parseNumber(slotsInput.value);
+      el.value = formatted;
 
-    if (rows >= 4) {
+      const newCaret = caretFromDigitIndex(formatted, digitIdx);
+      try { el.setSelectionRange(newCaret, newCaret); } catch(e){}
+
+      if(["buyPrice","sellPrice","currentBank","targetBank","rows","slots","bags"].includes(el.id)){
+        saveState({ [el.id]: el.value });
+      }
+      calc();
+    }
+
+    document.querySelectorAll(".comma-input").forEach(el=>{
+      el.addEventListener("compositionstart", ()=>{ isComposing = true; });
+      el.addEventListener("compositionend", ()=>{ isComposing = false; formatInputKeepCaret(el); });
+      el.addEventListener("input", ()=>{ if(!isComposing) formatInputKeepCaret(el); });
+      el.addEventListener("focus", ()=>{
+        if(el.id === "targetBank"){
+          const d = normalizeDigits(el.value);
+          if(d) lastTargetLen = d.length;
+        }
+      });
+    });
+
+    function setPlanEmptyState(isEmpty){
+      const plan = document.getElementById("planOutput");
+      if(isEmpty) plan.classList.add("plan-empty");
+      else plan.classList.remove("plan-empty");
+    }
+
+    /* Counters */
+    const buyTripEl  = document.getElementById("buyTripCount");
+    const sellTripEl = document.getElementById("sellTripCount");
+
+    function clampInt(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
+    function setCounter(el, key, v){
+      const n = clampInt(v);
+      el.textContent = toComma(n);
+      saveState({ [key]: n });
+    }
+    function getCounter(el){ return parseNumber(el.textContent); }
+
+    document.getElementById("buyTripPlus").addEventListener("click", ()=> setCounter(buyTripEl, "buyTripCount", getCounter(buyTripEl)+1));
+    document.getElementById("buyTripMinus").addEventListener("click", ()=> setCounter(buyTripEl, "buyTripCount", getCounter(buyTripEl)-1));
+    document.getElementById("buyTripReset").addEventListener("click", ()=> setCounter(buyTripEl, "buyTripCount", 0));
+
+    document.getElementById("sellTripPlus").addEventListener("click", ()=> setCounter(sellTripEl, "sellTripCount", getCounter(sellTripEl)+1));
+    document.getElementById("sellTripMinus").addEventListener("click", ()=> setCounter(sellTripEl, "sellTripCount", getCounter(sellTripEl)-1));
+    document.getElementById("sellTripReset").addEventListener("click", ()=> setCounter(sellTripEl, "sellTripCount", 0));
+
+    /* Clear buttons */
+    function clearField(id){
+      const el = document.getElementById(id);
+      el.value = "";
+      saveState({ [id]: "" });
+      calc();
+      el.focus();
+    }
+    document.getElementById("clearBuy").addEventListener("click", ()=> clearField("buyPrice"));
+    document.getElementById("clearSell").addEventListener("click", ()=> clearField("sellPrice"));
+    document.getElementById("clearCurrent").addEventListener("click", ()=> clearField("currentBank"));
+    document.getElementById("clearTarget").addEventListener("click", ()=>{
+      lastTargetLen = 0;
+      clearField("targetBank");
+    });
+
+    /* Shortcuts */
+    const TOOL_LIST = [
+      { key:"", label:"（未設定）", img:"" },
+      { key:"scop", label:"スコップ", img:"img/scop.png" },
+      { key:"turizao", label:"つりざお", img:"img/turizao.png" },
+      { key:"musiami", label:"あみ", img:"img/musiami.png" },
+      { key:"ono", label:"オノ", img:"img/ono.png" },
+      { key:"pachinko", label:"パチンコ", img:"img/pachinko.png" },
+      { key:"jouro", label:"ジョウロ", img:"img/jouro.png" },
+      { key:"takatobi", label:"たかとびぼう", img:"img/takatobi.png" },
+      { key:"hashigo", label:"はしご", img:"img/hashigo.png" },
+      { key:"sutekki", label:"ステッキ", img:"img/sutekki.png" },
+      { key:"timer", label:"タイマー", img:"img/timer.png" },
+      { key:"megahon", label:"メガホン", img:"img/megahon.png" }
+    ];
+    const DIRS = [
+      { id:"up",    label:"⬆️ 上" },
+      { id:"ur",    label:"↗️ 右上" },
+      { id:"right", label:"➡️ 右" },
+      { id:"dr",    label:"↘️ 右下" },
+      { id:"down",  label:"⬇️ 下" },
+      { id:"dl",    label:"↙️ 左下" },
+      { id:"left",  label:"⬅️ 左" },
+      { id:"ul",    label:"↖️ 左上" }
+    ];
+
+    const shortcutGrid = document.getElementById("shortcutGrid");
+    const shortcutMemoEl = document.getElementById("shortcutMemo");
+
+    function toolByKey(key){
+      return TOOL_LIST.find(t=>t.key===key) || TOOL_LIST[0];
+    }
+
+    const FALLBACK_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
+    function renderShortcutUI(state){
+      shortcutGrid.innerHTML = "";
+      const st = loadState() || {};
+      const shortcuts = (state && state.shortcuts) ? state.shortcuts : (st.shortcuts || {});
+
+      DIRS.forEach(d=>{
+        const curKey = shortcuts[d.id] ? String(shortcuts[d.id]) : "";
+        const curTool = toolByKey(curKey);
+
+        const item = document.createElement("div");
+        item.className = "shortcut-item";
+
+        const top = document.createElement("div");
+        top.className = "shortcut-top";
+
+        const dir = document.createElement("div");
+        dir.className = "dir";
+        dir.textContent = d.label;
+
+        top.appendChild(dir);
+        item.appendChild(top);
+
+        const view = document.createElement("div");
+        view.className = "tool-view";
+
+        const img = document.createElement("img");
+        img.className = "tool-img";
+        img.alt = curTool.label;
+        img.src = curTool.img || FALLBACK_IMG;
+        img.onerror = () => { img.src = FALLBACK_IMG; };
+        view.appendChild(img);
+
+        const select = document.createElement("select");
+        TOOL_LIST.forEach(t=>{
+          const opt = document.createElement("option");
+          opt.value = t.key;
+          opt.textContent = t.label;
+          if(t.key === curKey) opt.selected = true;
+          select.appendChild(opt);
+        });
+
+        select.addEventListener("change", ()=>{
+          const nextKey = select.value;
+          const nextTool = toolByKey(nextKey);
+          img.src = nextTool.img || FALLBACK_IMG;
+          img.alt = nextTool.label;
+
+          const cur = loadState() || {};
+          const next = { ...(cur.shortcuts || {}) };
+          next[d.id] = nextKey;
+          saveState({ shortcuts: next });
+        });
+
+        view.appendChild(select);
+        item.appendChild(view);
+        shortcutGrid.appendChild(item);
+      });
+    }
+
+    function setShortcutDefault(){
+      const defaults = {
+        up: "pachinko",
+        ur: "turizao",
+        right: "scop",
+        dr: "musiami",
+        down: "takatobi",
+        dl: "ono",
+        left: "hashigo",
+        ul: "jouro"
+      };
+      saveState({ shortcuts: defaults });
+      renderShortcutUI({ shortcuts: defaults });
+    }
+    function clearShortcutsOnly(){
+      saveState({ shortcuts: {} });
+      renderShortcutUI({ shortcuts: {} });
+      shortcutMemoEl.value = "";
+      saveState({ shortcutMemo: "" });
+    }
+    document.getElementById("shortcutDefault").addEventListener("click", setShortcutDefault);
+    document.getElementById("shortcutClear").addEventListener("click", clearShortcutsOnly);
+    shortcutMemoEl.addEventListener("input", ()=> saveState({ shortcutMemo: shortcutMemoEl.value }));
+
+    document.getElementById("clearMemoAll").addEventListener("click", ()=>{
+      setCounter(buyTripEl, "buyTripCount", 0);
+      setCounter(sellTripEl,"sellTripCount", 0);
+      shortcutMemoEl.value = "";
+      saveState({ shortcutMemo: "" });
+    });
+
+    /* Calc */
+    function calc(){
+      const buyVal    = document.getElementById("buyPrice").value;
+      const sellVal   = document.getElementById("sellPrice").value;
+      const rowsInput = document.getElementById("rows");
+      const slotsInput= document.getElementById("slots");
+      const bankVal   = document.getElementById("currentBank").value;
+      const targetVal = document.getElementById("targetBank").value;
+      const bagsVal   = document.getElementById("bags").value;
+
+      const maxAlert  = document.getElementById("maxAlert");
+
+      let rows  = parseNumber(rowsInput.value);
+      let slots = parseNumber(slotsInput.value);
+
+      if(rows >= 4){
         rows = 4;
         rowsInput.value = "4";
         slots = 0;
         slotsInput.value = "";
         slotsInput.disabled = true;
         maxAlert.style.display = "block";
-    } else {
+      }else{
         slotsInput.disabled = false;
         maxAlert.style.display = "none";
-        if (slots > 9) {
-            slots = 9;
-            slotsInput.value = "9";
+        if(slots > 9){
+          slots = 9;
+          slotsInput.value = "9";
         }
-    }
+      }
 
-    const bPrice = parseNumber(buyVal);
-    const sPrice = parseNumber(sellVal);
-    const currentBank = parseNumber(bankVal);
-    const targetBank = targetVal === "" ? 0 : parseNumber(targetVal);
-    const bags = parseNumber(bagsVal);
+      const bPrice = parseNumber(buyVal);
+      const sPrice = parseNumber(sellVal);
+      const currentBank = parseNumber(bankVal);
+      const targetBank  = targetVal === "" ? 0 : parseNumber(targetVal);
+      const bags = parseNumber(bagsVal);
 
-    const totalCapacitySlots = (rows * 10) + slots;
-    const capacityStocks = totalCapacitySlots * 100;
-    const costCurrent = capacityStocks * bPrice;
+      const totalCapacitySlots = (rows * 10) + slots;
+      const capacityStocks = totalCapacitySlots * 100;
 
-    document.getElementById('currentCapacityText').innerText = totalCapacitySlots;
-    document.getElementById('totalStocks').innerText = capacityStocks.toLocaleString();
-    document.getElementById('targetStocks').innerText = capacityStocks.toLocaleString();
-    document.getElementById('cost').innerText = costCurrent.toLocaleString();
-    document.getElementById('sales').innerText = (capacityStocks * sPrice).toLocaleString();
-    document.getElementById('profit').innerText = ((sPrice - bPrice) * capacityStocks).toLocaleString();
-    document.getElementById('atmTotal').innerText = (bags * 99000).toLocaleString();
+      const costCurrent = capacityStocks * bPrice;
+      const salesCurrent = capacityStocks * sPrice;
+      const profitCurrent = (sPrice - bPrice) * capacityStocks;
 
-    const needed = Math.max(0, targetBank - currentBank);
-    document.getElementById('neededAmount').innerText = needed.toLocaleString();
+      document.getElementById("currentCapacityText").innerText = toComma(totalCapacitySlots);
+      document.getElementById("totalStocks").innerText = toComma(capacityStocks);
+      document.getElementById("targetStocks").innerText = toComma(capacityStocks);
 
-    const autoBags = Math.floor(costCurrent / 99000);
-    const autoRem  = costCurrent % 99000;
-    autoBagsEl.textContent = autoBags.toLocaleString();
-    autoRemEl.textContent  = autoRem.toLocaleString();
-    autoCostEl.textContent = costCurrent.toLocaleString();
+      document.getElementById("cost").innerText = toComma(costCurrent);
+      document.getElementById("sales").innerText = toComma(salesCurrent);
+      document.getElementById("profit").innerText = toComma(profitCurrent);
 
-    let output = document.getElementById('planOutput');
+      document.getElementById("costBags").innerText  = toBagsText(costCurrent);
+      document.getElementById("salesBags").innerText = toBagsText(salesCurrent);
 
-    if (buyVal === "" || sellVal === "" || bankVal === "") {
-        document.getElementById('tripDisplay').style.display = "grid";
-        document.getElementById('tripAlert').style.display = "none";
-        document.getElementById('tripsFull').innerText = "0";
-        document.getElementById('tripsCurrent').innerText = "0";
+      const needed = Math.max(0, targetBank - currentBank);
+      document.getElementById("neededAmount").innerText = toComma(needed);
 
+      document.getElementById("atmTotal").innerText = toComma(bags * 99000);
+
+      // ATM：資金がカバン満タン購入に届く時だけ計算
+      const canFillBag = (bPrice > 0) && (totalCapacitySlots > 0) && (currentBank >= costCurrent);
+      const depositSuggest = canFillBag ? Math.max(0, salesCurrent - costCurrent) : 0;
+
+      document.getElementById("atmSuggestBags").innerText = toBagsText(depositSuggest);
+      document.getElementById("atmSuggestTotal").innerText = toComma(depositSuggest);
+
+      document.getElementById("atmCapacityText").innerText = toComma(totalCapacitySlots);
+
+      document.getElementById("memoPayBags").innerText = toBagsText(costCurrent);
+      document.getElementById("memoPayTotal").innerText = toComma(costCurrent);
+
+      const perTripProfit = profitCurrent;
+      const tripsToGoal = (perTripProfit > 0) ? Math.ceil(needed / perTripProfit) : 0;
+      document.getElementById("memoTripsToGoal").innerText = toComma(tripsToGoal);
+
+      const fullProfitPerTrip = (sPrice - bPrice) * 4000;
+      const tripsToGoalFull = (fullProfitPerTrip > 0) ? Math.ceil(needed / fullProfitPerTrip) : 0;
+      document.getElementById("tripsFull").innerText = toComma(tripsToGoalFull);
+      document.getElementById("tripsCurrent").innerText = toComma(tripsToGoal);
+
+      const tripDisplay = document.getElementById("tripDisplay");
+      const tripAlert   = document.getElementById("tripAlert");
+      const planOut = document.getElementById("planOutput");
+
+      if(buyVal === "" || sellVal === "" || bankVal === ""){
+        tripDisplay.style.display = "grid";
+        tripAlert.style.display = "none";
         setPlanEmptyState(true);
-        output.innerHTML = `
+        planOut.innerHTML = `
           <div class="empty-msg">
             <ruby>買値<rt>かいね</rt></ruby>・
             <ruby>売値<rt>うりね</rt></ruby>・
@@ -605,97 +1035,117 @@ function calc() {
           </div>
         `;
         return;
-    }
+      }
 
-    setPlanEmptyState(false);
+      if(!(sPrice > bPrice)){
+        setPlanEmptyState(false);
+        planOut.textContent = "売値は買値より高く設定してください。";
+        tripDisplay.style.display = "grid";
+        tripAlert.style.display = "none";
+        return;
+      }
 
-    if (sPrice > bPrice) {
-        let tempBank = currentBank;
-        let stepCount = 0;
-        let log = "";
+      const needToFillBag = costCurrent;
+      let tempBank = currentBank;
+      let stepCount = 0;
+      let log = "";
 
-        while (tempBank < costCurrent && stepCount < 100) {
-            stepCount++;
-            let buyAmount = Math.floor(tempBank / bPrice);
-            let profit = buyAmount * (sPrice - bPrice);
-            if (stepCount <= 3) {
-                log += `<li>${stepCount}<ruby>回目<rt>かいめ</rt></ruby>：${buyAmount.toLocaleString()}カブ<ruby>購入<rt>こうにゅう</rt></ruby></li>`;
-            }
-            tempBank += profit;
+      const notEnoughNow = tempBank < needToFillBag;
+
+      while(tempBank < needToFillBag && stepCount < 200){
+        stepCount++;
+        const buyAmount = Math.floor(tempBank / bPrice);
+        const profit = buyAmount * (sPrice - bPrice);
+
+        if(stepCount <= 8){
+          log += `<li>${stepCount}<ruby>回目<rt>かいめ</rt></ruby>：${toComma(buyAmount)}カブ<ruby>購入<rt>こうにゅう</rt></ruby></li>`;
         }
+        tempBank += profit;
+        if(profit <= 0) break;
+      }
 
-        if (stepCount > 0) {
-            document.getElementById('tripDisplay').style.display = "none";
-            document.getElementById('tripAlert').style.display = "block";
-        } else {
-            document.getElementById('tripDisplay').style.display = "grid";
-            document.getElementById('tripAlert').style.display = "none";
-            document.getElementById('tripsFull').innerText = Math.ceil(needed / ((sPrice - bPrice) * 4000)).toLocaleString();
-            document.getElementById('tripsCurrent').innerText = Math.ceil(needed / ((sPrice - bPrice) * capacityStocks)).toLocaleString();
-        }
+      if(notEnoughNow){
+        tripDisplay.style.display = "none";
+        tripAlert.style.display = "block";
+      }else{
+        tripDisplay.style.display = "grid";
+        tripAlert.style.display = "none";
+      }
 
-        let message = `<div><b>カバン(${totalCapacitySlots}マス)</b>を<ruby>満タン<rt>まんたん</rt></ruby>にする<ruby>計画<rt>けいかく</rt></ruby>：</div>`;
+      setPlanEmptyState(false);
 
-        if (stepCount === 0) {
-          message += `<div style="margin:10px 0;">
-            <b class="blue-val">1<ruby>回目<rt>かいめ</rt></ruby>からカバンを<ruby>満タン<rt>まんたん</rt></ruby>にできます！</b>
-          </div>`;
-        } else {
-          message += `<ul class="step-list">${log}</ul>`;
+      let message = `<div><b>カバン(${totalCapacitySlots}マス)</b>を<ruby>満タン<rt>まんたん</rt></ruby>にする<ruby>計画<rt>けいかく</rt></ruby>：</div>`;
 
-          if (stepCount > 3) {
-            message += `
-              <div class="step-note">...あと ${stepCount - 3} <ruby>回<rt>かい</rt></ruby>の<ruby>往復<rt>おうふく</rt></ruby> ...</div>
-              <div class="step-note">（3<ruby>回目<rt>かいめ</rt></ruby>と<ruby>同<rt>おな</rt></ruby>じように<ruby>往復<rt>おうふく</rt></ruby>して<ruby>資金<rt>しきん</rt></ruby>を<ruby>貯<rt>た</rt></ruby>めます）</div>
-            `;
-          }
-
-          message += `<div>
-            あと <b class="red-val">${stepCount}</b> <ruby>往復<rt>おうふく</rt></ruby>でカバンがいっぱいになります。
-          </div>`;
-        }
-
-        let remainingNeeded = Math.max(0, targetBank - tempBank);
-        let finalTrips = Math.ceil(remainingNeeded / ((sPrice - bPrice) * capacityStocks));
-
-        message += `<div style="margin-top:10px; border-top:1px solid #00897b; padding-top:10px;">
-          <ruby>目標達成<rt>もくひょうたっせい</rt></ruby>までさらに <b class="red-val">${finalTrips}</b> <ruby>往復<rt>おうふく</rt></ruby>、<br>
-          <ruby>合計<rt>ごうけい</rt></ruby>で <b style="font-size:1.4em;">${stepCount + finalTrips}</b> <ruby>往復<rt>おうふく</rt></ruby><ruby>必要<rt>ひつよう</rt></ruby>です。
+      if(!notEnoughNow){
+        message += `<div style="margin:8px 0; font-weight:900; color:#00796b;">
+          1<ruby>回目<rt>かいめ</rt></ruby>からカバンを<ruby>満タン<rt>まんたん</rt></ruby>にできます！
         </div>`;
+      }else{
+        message += `<ul>${log}</ul>`;
 
-        output.innerHTML = message;
+        if(stepCount > 8){
+          const rest = stepCount - 8;
+          message += `
+            <div style="margin-top:6px; font-weight:900; color:#00695c;">
+              ...あと ${rest} <ruby>回<rt>かい</rt></ruby>の<ruby>往復<rt>おうふく</rt></ruby>...
+            </div>
+            <div style="font-weight:900; color:#00695c;">
+              （8<ruby>回目<rt>かいめ</rt></ruby>と<ruby>同<rt>おな</rt></ruby>じように<ruby>往復<rt>おうふく</rt></ruby>して<ruby>資金<rt>しきん</rt></ruby>を<ruby>貯<rt>た</rt></ruby>めます）
+            </div>
+          `;
+        }
 
-    } else {
-        output.innerText = "売値は買値より高く設定してください。";
+        message += `<div style="margin-top:10px; font-weight:900;">
+          あと <span class="red-val">${toComma(stepCount)}</span> <ruby>往復<rt>おうふく</rt></ruby>でカバンがいっぱいになります。
+        </div>`;
+      }
+
+      message += `<hr class="plan-hr">`;
+      message += `<div style="font-weight:900;">
+        <ruby>目標達成<rt>もくひょうたっせい</rt></ruby>まであと <span class="red-val">${toComma(tripsToGoal)}</span> <ruby>往復<rt>おうふく</rt></ruby>です。
+      </div>`;
+
+      planOut.innerHTML = message;
     }
-}
 
-/* ふりがな ON/OFF（保存しない） */
-const rubyBtn = document.getElementById('rubyToggle');
-rubyBtn.addEventListener('click', () => {
-    document.body.classList.toggle('no-ruby');
-    rubyBtn.textContent = document.body.classList.contains('no-ruby')
-        ? 'ふりがな：OFF'
-        : 'ふりがな：ON';
-});
+    /* Ruby toggle */
+    const rubyBtn = document.getElementById("rubyToggle");
+    rubyBtn.addEventListener("click", ()=>{
+      document.body.classList.toggle("no-ruby");
+      rubyBtn.textContent = document.body.classList.contains("no-ruby") ? "ふりがな：OFF" : "ふりがな：ON";
+    });
 
-/* 初期復元：目標金額＋メモ＋往復だけ */
-(function initFromCookie(){
-    const st = loadState();
-    if(!st) { calc(); return; }
+    /* init */
+    (function init(){
+      const st = loadState();
 
-    if(typeof st.targetBank === "string"){
-        document.getElementById("targetBank").value = st.targetBank;
-    }
+      if(st){
+        const ids = ["buyPrice","sellPrice","currentBank","targetBank","rows","slots","bags"];
+        ids.forEach(id=>{
+          if(typeof st[id] === "string"){
+            const el = document.getElementById(id);
+            if(el) el.value = st[id];
+          }
+        });
 
-    if(typeof st.buyTripCount === "number")  buyTripEl.textContent  = st.buyTripCount.toLocaleString();
-    if(typeof st.sellTripCount === "number") sellTripEl.textContent = st.sellTripCount.toLocaleString();
+        if(typeof st.buyTripCount === "number")  buyTripEl.textContent  = toComma(st.buyTripCount);
+        if(typeof st.sellTripCount === "number") sellTripEl.textContent = toComma(st.sellTripCount);
 
-    if(typeof st.bagMemo === "string")  bagMemoEl.value = st.bagMemo;
-    if(typeof st.freeMemo === "string") freeMemoEl.value = st.freeMemo;
+        if(typeof st.shortcutMemo === "string") shortcutMemoEl.value = st.shortcutMemo;
 
-    calc();
-})();
-</script>
+        renderShortcutUI({ shortcuts: st.shortcuts || {} });
+      }else{
+        renderShortcutUI({ shortcuts: {} });
+      }
+
+      const tb = document.getElementById("targetBank");
+      if(tb){
+        const d = normalizeDigits(tb.value);
+        if(d) lastTargetLen = d.length;
+      }
+
+      calc();
+    })();
+  </script>
 </body>
 </html>
