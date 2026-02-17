@@ -140,6 +140,15 @@
       .header-row .btn{align-self:flex-start;}
       .goal .memo-row{flex-direction:column;align-items:flex-start;gap:8px;}
       .goal .memo-row .btn{align-self:flex-start;}
+
+      /* ===== iPhone見切れ対策（ここだけ追加・他は触らない） ===== */
+      .cap-row .cap-input{
+        width:auto;
+        min-width:0;
+        max-width:none;
+        flex:1 1 0;
+      }
+      /* =========================================================== */
     }
   </style>
 </head>
